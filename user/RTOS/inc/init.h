@@ -17,14 +17,42 @@
 #define __INIT_H
 
 /**
- * @brief  自动注册初始化函数
+ * @brief  自动注册无参初始化函数
  *
  * 放在文件作用域(函数外), 将 fn 的函数指针放入 .initcall section。
  * 链接后, initcall_run() 会自动调用 fn。
  */
-#define MODULE_INIT(fn)                      \
-	static void (*__initcall_##fn)(void) \
-		__attribute__((used, section(".initcall"))) = fn
+#define MODULE_INIT(fn)                                       \
+	static void __initcall_wrapper_##fn(void)             \
+	{                                                     \
+		fn();                                         \
+	}                                                     \
+	static void (*__initcall_##fn)(void)                  \
+		__attribute__((used, section(".initcall"))) = \
+			__initcall_wrapper_##fn
+
+/**
+ * @brief  自动注册带默认参数的初始化函数
+ *
+ * 用于 xxx_thread_init(const void *ctx) 签名的函数。
+ * 自动生成 wrapper, 调用时传入 &default_params 作为默认参数。
+ *
+ * 用法:
+ *   static const my_params_t default_params = { ... };
+ *   void my_thread_init(const void *ctx) { ... }
+ *   MODULE_INIT_DEFAULT(my_thread_init, default_params);
+ *
+ * @param  fn    初始化函数名, 签名须为 void fn(const void *ctx)
+ * @param  def   默认参数变量名(须为 static 生命周期)
+ */
+#define MODULE_INIT_DEFAULT(fn, def)                          \
+	static void __initcall_wrapper_##fn(void)             \
+	{                                                     \
+		fn(&(def));                                   \
+	}                                                     \
+	static void (*__initcall_##fn)(void)                  \
+		__attribute__((used, section(".initcall"))) = \
+			__initcall_wrapper_##fn
 
 /**
  * @brief  initcall section 边界符号 (由链接器脚本 STM32F103XX_FLASH.ld 定义)
@@ -33,7 +61,7 @@ extern void (*__initcall_start[])(void);
 extern void (*__initcall_end[])(void);
 
 /**
- * @brief  遍历并调用所有 MODULE_INIT() 注册的初始化函数
+ * @brief  遍历并调用所有注册的初始化函数
  *
  * 在 tx_application_define() 中调用。
  */

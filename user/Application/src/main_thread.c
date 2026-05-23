@@ -15,6 +15,11 @@
 #define MAIN_THREAD_STACK_SIZE 1024
 #define MAIN_THREAD_PREEMPT_THRESH MAIN_THREAD_PRIORITY
 
+/* 默认参数 */
+static const main_thread_params_t default_params = {
+	.color_cycle_ms = 500,
+};
+
 /* ThreadX 对象(本文件私有) */
 static TX_THREAD thread;
 static UCHAR thread_stack[MAIN_THREAD_STACK_SIZE];
@@ -22,17 +27,30 @@ static UCHAR thread_stack[MAIN_THREAD_STACK_SIZE];
 /* 线程入口函数 */
 static void thread_entry(ULONG input);
 
-void main_thread_init(void)
+/**
+ * @brief  初始化并启动主应用线程
+ *
+ * @param  ctx  指向参数结构体的指针, 传 NULL 使用默认参数。
+ *              调用者需保证 ctx 指向的内存在线程运行期间有效。
+ *
+ * 由 MODULE_INIT_DEFAULT() 自动注册(使用默认参数),
+ * 也可被其他模块直接调用以传入自定义参数。
+ */
+void main_thread_init(const void *ctx)
 {
-	tx_thread_create(&thread, "main_thread", thread_entry, 0, thread_stack,
-			 MAIN_THREAD_STACK_SIZE, MAIN_THREAD_PRIORITY,
-			 MAIN_THREAD_PREEMPT_THRESH, TX_NO_TIME_SLICE,
-			 TX_AUTO_START);
+	if (!ctx)
+		ctx = &default_params;
+
+	tx_thread_create(&thread, "main_thread", thread_entry, (ULONG)ctx,
+			 thread_stack, MAIN_THREAD_STACK_SIZE,
+			 MAIN_THREAD_PRIORITY, MAIN_THREAD_PREEMPT_THRESH,
+			 TX_NO_TIME_SLICE, TX_AUTO_START);
 }
 
 static void thread_entry(ULONG input)
 {
-	(void)input;
+	const main_thread_params_t *params =
+		(const main_thread_params_t *)input;
 
 	rgb_led_init();
 
@@ -48,8 +66,9 @@ static void thread_entry(ULONG input)
 	while (1) {
 		rgb_led_set_color(color_table[color_index]);
 		color_index = (color_index + 1) % COLOR_TABLE_SIZE;
-		tx_thread_sleep(500);
+		tx_thread_sleep(
+			params->color_cycle_ms ? params->color_cycle_ms : 1);
 	}
 }
 
-MODULE_INIT(main_thread_init);
+MODULE_INIT_DEFAULT(main_thread_init, default_params);
