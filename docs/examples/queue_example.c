@@ -73,4 +73,8 @@ static void consumer_entry(ULONG input)
 	}
 }
 
+/*
+ * 无参初始化函数使用 MODULE_INIT()。
+ * 需要默认参数的强类型 init 函数使用 MODULE_INIT_DEFAULT()。
+ */
 MODULE_INIT(queue_example_init);

@@ -41,26 +41,25 @@ MODULE_INIT(my_thread_init);
 
 ```c
 static const my_thread_params_t default_params = {
-	.interval_ticks = 500,
+	.interval_ticks = APP_MS_TO_TICKS(500),
 };
 
 void my_thread_init(const my_thread_params_t *params)
 {
-	UINT status;
-
 	if (!params)
 		params = &default_params;
 
-	status = tx_thread_create(&thread, "my_thread", thread_entry,
-				  (ULONG)params, thread_stack, THREAD_STACK_SIZE,
-				  THREAD_PRIORITY, THREAD_PRIORITY,
-				  TX_NO_TIME_SLICE, TX_AUTO_START);
-	if (status != TX_SUCCESS)
-		Error_Handler();
+	APP_TX_CHECK(tx_thread_create(&thread, "my_thread", thread_entry,
+				      (ULONG)params, thread_stack,
+				      THREAD_STACK_SIZE, THREAD_PRIORITY,
+				      THREAD_PRIORITY, TX_NO_TIME_SLICE,
+				      TX_AUTO_START));
 }
 
 MODULE_INIT_DEFAULT(my_thread_init, default_params);
 ```
+
+选择规则：无参初始化函数使用 `MODULE_INIT()`；需要默认参数的强类型初始化函数使用 `MODULE_INIT_DEFAULT()`。
 
 ## 添加新线程
 
@@ -98,7 +97,7 @@ ThreadX 优先级数字越小，调度优先级越高。本项目约定：
 
 `tx_thread_sleep()` 接收的是 ThreadX tick，不是毫秒。当前底层配置为 1ms tick，但模板字段仍使用 `*_ticks` 命名，避免以后修改 tick 频率时产生误解。传入 sleep 的 tick 值至少为 1，防止线程进入无阻塞忙循环。
 
-使用 `APP_MS_TO_TICKS(ms)` 从毫秒转换为 tick，使用 `APP_MIN_SLEEP_TICKS(ticks)` 防御 0 tick sleep。ThreadX API 初始化返回值使用 `APP_TX_CHECK()` 统一检查。
+使用 `APP_MS_TO_TICKS(ms)` 从毫秒转换为 tick。该宏按整数除法向下取整；如果转换结果可能为 0，再通过 `APP_MIN_SLEEP_TICKS(ticks)` 防御 0 tick sleep。ThreadX API 初始化返回值使用 `APP_TX_CHECK()` 统一检查。
 
 ## 线程间通信
 

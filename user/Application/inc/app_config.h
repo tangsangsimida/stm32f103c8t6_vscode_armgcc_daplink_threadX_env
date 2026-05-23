@@ -16,8 +16,7 @@
  */
 #define APP_TICKS_PER_SECOND 1000UL
 
-#define APP_MS_TO_TICKS(ms) \
-	((((ULONG)(ms)) * APP_TICKS_PER_SECOND + 999UL) / 1000UL)
+#define APP_MS_TO_TICKS(ms) (((ULONG)(ms) * APP_TICKS_PER_SECOND) / 1000UL)
 
 #define APP_MIN_SLEEP_TICKS(ticks) ((ticks) ? (ticks) : 1UL)
 
