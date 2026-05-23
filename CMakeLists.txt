@@ -7,83 +7,112 @@ cmake_minimum_required(VERSION 3.22)
 # User is free to modify the file as much as necessary
 #
 
-# Setup compiler settings
+# ============================================================================
+# [移植说明] 更换MCU时需要修改的内容:
+#   1. CMAKE_PROJECT_NAME  - 项目名称
+#   2. cmake/gcc-arm-none-eabi.cmake - 工具链文件中的TARGET_FLAGS(如-mcpu)
+#   3. STM32F103XX_FLASH.ld - 链接脚本(内存区域大小和起始地址)
+#   4. cortex_m3/ 目录 - 更换为对应ARM内核的ThreadX移植目录
+# ============================================================================
+
+# 编译器设置
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
 
-# Define the build type
+# 构建类型
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
-# Set the project name
+# [移植说明] 修改为你的项目名称
 set(CMAKE_PROJECT_NAME stm32f103c8t6_vscode_armgcc_daplink_threadX_env)
 
-# Enable compile command to ease indexing with e.g. clangd
+# 生成compile_commands.json, 供clangd等工具使用
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
-# Core project settings
+# 项目设置
 project(${CMAKE_PROJECT_NAME})
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
-# Enable CMake support for ASM and C languages
+# 启用C和ASM语言支持
+# [移植说明] 如果MCU需要C++支持(如Cortex-M4/M7), 可在此添加CXX
 enable_language(C ASM)
 
-# Create an executable object type
+# 创建可执行目标
 add_executable(${CMAKE_PROJECT_NAME})
 
-# Add STM32CubeMX generated sources
+# ---------------------------------------------------------------------------
+# CubeMX生成的源文件(由CubeMX自动管理, 不要手动修改此子目录)
+# ---------------------------------------------------------------------------
 add_subdirectory(cmake/stm32cubemx)
 
-# Add ThreadX RTOS
+# ---------------------------------------------------------------------------
+# ThreadX实时操作系统
+#
+# common/        - 平台无关的ThreadX内核(C源文件)
+# cortex_m3/gnu/ - Cortex-M3专用移植(汇编: 上下文切换、定时器中断)
+#
+# [移植说明] 如果更换ARM内核(如Cortex-M4/M7), 需要将cortex_m3/替换为
+#            对应的移植目录(cortex_m4/、cortex_m7/等)。
+#            common/目录对所有内核通用, 无需修改。
+# ---------------------------------------------------------------------------
 add_subdirectory(common)
 add_subdirectory(cortex_m3/gnu)
 
-# ThreadX include paths (for user code that uses ThreadX API)
+# ThreadX头文件路径(供用户代码调用ThreadX API时使用)
 set(THREADX_Include_Dirs
     ${CMAKE_SOURCE_DIR}/common/inc
     ${CMAKE_SOURCE_DIR}/cortex_m3/gnu/inc
 )
 
-# Add user application code
+# ---------------------------------------------------------------------------
+# 用户应用代码
+#
+# 文件管理采用自动收集方式, 添加新文件无需修改CMakeLists.txt:
+#   - 源文件(.c/.cpp): 放入 user/Application/src/ 或 user/Peripherals/src/
+#   - 头文件(.h/.hpp): 放入 user/Application/inc/ 或 user/Peripherals/inc/
+#   - 支持子目录(如 user/Peripherals/inc/spi/)
+# ---------------------------------------------------------------------------
 add_subdirectory(user)
 
-# Make ThreadX headers available to user code
+# 将ThreadX头文件路径传递给用户代码目标
 target_include_directories(user_objects PUBLIC ${THREADX_Include_Dirs})
 
-# Link directories setup
+# 链接目录设置
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined library search paths
+    # 在此添加用户自定义库搜索路径
 )
 
-# Add sources to executable
+# 添加源文件到可执行目标
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user sources here
+    # 在此添加用户自定义源文件
 )
 
-# Add include paths
+# 添加头文件搜索路径
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined include paths
+    # 在此添加用户自定义头文件路径
 )
 
-# Add project symbols (macros)
+# 添加预处理宏定义
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined symbols
+    # 在此添加用户自定义宏定义
 )
 
-# Remove wrong libob.a library dependency when using cpp files
+# 移除错误的libob.a依赖(使用C++文件时需要)
 list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 
-# Add linked libraries
+# 链接库
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
     user_objects
-    # Add user defined libraries
+    # 在此添加用户自定义库
 )
 
-# Generate .hex and .bin files after build
+# ---------------------------------------------------------------------------
+# 构建后处理: 生成.hex和.bin文件
+# ---------------------------------------------------------------------------
 set(HEX_FILE ${CMAKE_PROJECT_NAME}.hex)
 set(BIN_FILE ${CMAKE_PROJECT_NAME}.bin)
 

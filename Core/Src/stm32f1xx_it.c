@@ -167,15 +167,40 @@ void DebugMon_Handler(void)
 
 /**
   * @brief This function handles Pendable request for system service.
-  *        Owned by ThreadX — defined in cortex_m3/gnu/src/tx_thread_schedule.S
+  *
+  * [THREADX] PendSV被ThreadX用于上下文切换。
+  *           真正的处理函数定义在cortex_m3/gnu/src/tx_thread_schedule.S中。
+  *           此__weak桩函数允许CubeMX重新生成此文件而不引起链接冲突。
+  *           ThreadX汇编文件中的强定义会自动覆盖此弱定义。
   */
-// PendSV_Handler is defined by ThreadX port assembly
+__weak void PendSV_Handler(void)
+{
+  /* USER CODE BEGIN PendSV_IRQn 0 */
+
+  /* USER CODE END PendSV_IRQn 0 */
+  /* USER CODE BEGIN PendSV_IRQn 1 */
+
+  /* USER CODE END PendSV_IRQn 1 */
+}
 
 /**
   * @brief This function handles System tick timer.
-  *        Owned by ThreadX — see user/Application/src/tx_initialize_low_level.c
+  *
+  * [THREADX] SysTick被ThreadX用于周期性定时器节拍。
+  *           真正的处理函数定义在user/Application/src/tx_initialize_low_level.c中,
+  *           调用_tx_timer_interrupt()。
+  *           此__weak桩函数允许CubeMX重新生成此文件而不引起链接冲突。
+  *           tx_initialize_low_level.c中的强定义会自动覆盖此弱定义。
   */
-// SysTick_Handler is defined in tx_initialize_low_level.c for ThreadX
+__weak void SysTick_Handler(void)
+{
+  /* USER CODE BEGIN SysTick_IRQn 0 */
+
+  /* USER CODE END SysTick_IRQn 0 */
+  /* USER CODE BEGIN SysTick_IRQn 1 */
+
+  /* USER CODE END SysTick_IRQn 1 */
+}
 
 /******************************************************************************/
 /* STM32F1xx Peripheral Interrupt Handlers                                    */
@@ -186,6 +211,10 @@ void DebugMon_Handler(void)
 
 /**
   * @brief This function handles TIM4 global interrupt.
+  *
+  * [THREADX] TIM4作为HAL时间基准(而非SysTick)。SysTick专属于ThreadX。
+  *           详见stm32f1xx_hal_timebase_tim.c。
+  *           这样可以避免HAL_Delay()与ThreadX调度器节拍之间的冲突。
   */
 void TIM4_IRQHandler(void)
 {

@@ -1,35 +1,73 @@
-# User header file paths
-set(USER_Include_Dirs
-    ${CMAKE_CURRENT_SOURCE_DIR}/Application/inc
-    ${CMAKE_CURRENT_SOURCE_DIR}/Peripherals/inc
-    $<TARGET_PROPERTY:stm32cubemx,INTERFACE_INCLUDE_DIRECTORIES>  # Auto-import CubeMX include paths
+# ============================================================================
+# 用户代码管理
+#
+# 本文件自动收集user/目录下所有源文件和头文件, 添加/删除文件时无需修改。
+#
+# 目录结构:
+#   user/
+#   +-- Application/
+#   |   +-- inc/    (应用层头文件)
+#   |   +-- src/    (应用层源文件)
+#   +-- Peripherals/
+#       +-- inc/    (外设驱动头文件)
+#       +-- src/    (外设驱动源文件)
+#
+# inc/和src/下的子目录会被自动递归收集。
+#
+# [移植说明] 本文件与MCU无关, 更换MCU时无需修改。
+# ============================================================================
+
+# ---------------------------------------------------------------------------
+# 自动收集头文件目录
+#
+# 通过GLOB_RECURSE找到所有.h/.hpp文件, 然后提取其父目录。
+# 这样在任意子目录中添加头文件(如Peripherals/inc/spi/spi.h)会自动
+# 将Peripherals/inc/spi/加入头文件搜索路径。
+# ---------------------------------------------------------------------------
+file(GLOB_RECURSE USER_Include_Dirs_ABS
+    "${CMAKE_CURRENT_SOURCE_DIR}/Application/inc/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Application/inc/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Peripherals/inc/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Peripherals/inc/*.hpp"
 )
 
-# Auto-collect Application sources
+set(USER_Include_Dirs "")
+foreach(header ${USER_Include_Dirs_ABS})
+    get_filename_component(dir ${header} DIRECTORY)
+    list(APPEND USER_Include_Dirs ${dir})
+endforeach()
+list(REMOVE_DUPLICATES USER_Include_Dirs)
+
+# ---------------------------------------------------------------------------
+# 自动收集源文件
+# ---------------------------------------------------------------------------
 file(GLOB_RECURSE USER_Application_Src
     "${CMAKE_CURRENT_SOURCE_DIR}/Application/src/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Application/src/*.cpp"
 )
 
-# Auto-collect Peripherals sources
 file(GLOB_RECURSE USER_Peripherals_Src
     "${CMAKE_CURRENT_SOURCE_DIR}/Peripherals/src/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Peripherals/src/*.cpp"
 )
 
-# Merge all user sources
 set(USER_Sources
     ${USER_Application_Src}
     ${USER_Peripherals_Src}
 )
 
-# Interface library for sharing headers and defines
+# ---------------------------------------------------------------------------
+# 构建目标
+#
+# user_interface : 接口库, 导出头文件路径和CubeMX的头文件路径
+# user_objects   : 对象库, 编译所有用户源文件, 由根CMakeLists.txt链接到主目标
+# ---------------------------------------------------------------------------
 add_library(user_interface INTERFACE)
 target_include_directories(user_interface INTERFACE
     ${USER_Include_Dirs}
+    $<TARGET_PROPERTY:stm32cubemx,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
-# Object library for compiling user code
 add_library(user_objects OBJECT)
 target_sources(user_objects PRIVATE
     ${USER_Sources}
@@ -37,6 +75,6 @@ target_sources(user_objects PRIVATE
 
 target_link_libraries(user_objects PUBLIC user_interface stm32cubemx STM32_Drivers)
 
-# Expose variables to parent CMakeLists.txt
+# 将变量暴露给父级CMakeLists.txt(用于ThreadX头文件路径传递)
 set(USER_Sources ${USER_Sources} PARENT_SCOPE)
 set(USER_Include_Dirs ${USER_Include_Dirs} PARENT_SCOPE)
