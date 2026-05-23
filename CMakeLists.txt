@@ -37,6 +37,22 @@ add_executable(${CMAKE_PROJECT_NAME})
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
 
+# Add ThreadX RTOS
+add_subdirectory(common)
+add_subdirectory(cortex_m3/gnu)
+
+# ThreadX include paths (for user code that uses ThreadX API)
+set(THREADX_Include_Dirs
+    ${CMAKE_SOURCE_DIR}/common/inc
+    ${CMAKE_SOURCE_DIR}/cortex_m3/gnu/inc
+)
+
+# Add user application code
+add_subdirectory(user)
+
+# Make ThreadX headers available to user code
+target_include_directories(user_objects PUBLIC ${THREADX_Include_Dirs})
+
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
@@ -63,6 +79,27 @@ list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
-
+    user_objects
     # Add user defined libraries
+)
+
+# Generate .hex and .bin files after build
+set(HEX_FILE ${CMAKE_PROJECT_NAME}.hex)
+set(BIN_FILE ${CMAKE_PROJECT_NAME}.bin)
+
+add_custom_command(
+    TARGET ${CMAKE_PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${HEX_FILE}
+    COMMENT "Generating ${HEX_FILE}"
+)
+add_custom_command(
+    TARGET ${CMAKE_PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${BIN_FILE}
+    COMMENT "Generating ${BIN_FILE}"
+)
+
+set_directory_properties(PROPERTIES
+    ADDITIONAL_MAKE_CLEAN_FILES "${HEX_FILE};${BIN_FILE}"
 )

@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "tx_api.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -92,12 +92,12 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    /* USER CODE END WHILE */
+  /* ThreadX kernel start — never returns.
+   * tx_application_define() will be called to create threads. */
+  tx_kernel_enter();
+  /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
-  }
+  /* USER CODE BEGIN 3 */
   /* USER CODE END 3 */
 }
 
