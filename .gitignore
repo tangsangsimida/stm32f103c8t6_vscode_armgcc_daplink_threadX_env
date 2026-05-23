@@ -1,2 +1,20 @@
+# Build output
+build/
+
+# IDE
+.cache/
+*.swp
+*.swo
+*~
+
+# Claude Code
 CLAUDE.md
-build
+AGENTS.md
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
