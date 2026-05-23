@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.22)
 #   1. CMAKE_PROJECT_NAME  - 项目名称
 #   2. cmake/gcc-arm-none-eabi.cmake - 工具链文件中的TARGET_FLAGS(如-mcpu)
 #   3. STM32F103XX_FLASH.ld - 链接脚本(内存区域大小和起始地址)
-#   4. cortex_m3/ 目录 - 更换为对应ARM内核的ThreadX移植目录
+#   4. lib/ThreadX/port/ 目录 - 更换为对应ARM内核的ThreadX移植目录
 # ============================================================================
 
 # 编译器设置
@@ -51,7 +51,7 @@ add_subdirectory(cmake/stm32cubemx)
 # ---------------------------------------------------------------------------
 # 中间件: ThreadX实时操作系统
 #
-# Middlewares/ThreadX/ 包含:
+# lib/ThreadX/ 包含:
 #   common/   - 平台无关内核(185个.c文件)
 #   port/gnu/ - Cortex-M3/GNU移植(7个.S汇编文件)
 #
@@ -60,10 +60,10 @@ add_subdirectory(cmake/stm32cubemx)
 #   threadx_port   - OBJECT库, 移植层汇编编译产物
 #   threadx_core   - INTERFACE库, 聚合以上两者并导出头文件路径
 #
-# [移植说明] 切换ARM内核时, 修改 Middlewares/ThreadX/CMakeLists.txt
+# [移植说明] 切换ARM内核时, 修改 lib/ThreadX/CMakeLists.txt
 #            中的 THREADX_PORT_DIR 变量。
 # ---------------------------------------------------------------------------
-add_subdirectory(Middlewares/ThreadX)
+add_subdirectory(lib/ThreadX)
 
 # ---------------------------------------------------------------------------
 # 用户应用代码

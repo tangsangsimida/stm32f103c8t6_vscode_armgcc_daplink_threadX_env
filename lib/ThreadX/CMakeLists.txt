@@ -2,7 +2,7 @@
 # ThreadX RTOS CMake配置
 #
 # 本文件是ThreadX中间件的统一入口。根CMakeLists.txt通过
-# add_subdirectory(Middlewares/ThreadX)引用本文件。
+# add_subdirectory(lib/ThreadX)引用本文件。
 #
 # 提供三个CMake目标:
 #   threadx_kernel : OBJECT库, 包含平台无关的ThreadX内核源文件
