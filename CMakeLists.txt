@@ -44,6 +44,21 @@ enable_language(C ASM)
 add_executable(${CMAKE_PROJECT_NAME})
 
 # ---------------------------------------------------------------------------
+# CubeMX + ThreadX 兼容性修复
+#
+# CubeMX重新生成代码时会把PendSV_Handler和SysTick_Handler写回stm32f1xx_it.c,
+# 与ThreadX的强定义冲突导致多重定义错误。以下脚本在配置阶段自动移除这两个函数。
+# ---------------------------------------------------------------------------
+execute_process(
+    COMMAND bash ${CMAKE_SOURCE_DIR}/tools/fix_cubemx_threadx.sh
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    RESULT_VARIABLE FIX_RESULT
+)
+if(FIX_RESULT EQUAL 0)
+    message(STATUS "CubeMX + ThreadX interrupt handler fix applied")
+endif()
+
+# ---------------------------------------------------------------------------
 # CubeMX生成的源文件(由CubeMX自动管理, 不要手动修改此子目录)
 # ---------------------------------------------------------------------------
 add_subdirectory(cmake/stm32cubemx)
