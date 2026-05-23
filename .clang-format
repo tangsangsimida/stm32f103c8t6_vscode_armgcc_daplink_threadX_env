@@ -1,68 +1,121 @@
 # ============================================================================
-# clang-format 配置
+# clang-format 配置 — Linux 内核代码风格
 #
-# 基于项目现有代码风格, 适用于STM32嵌入式C项目。
-# VS Code安装clang-format插件后, 保存时自动格式化。
+# 基于 Linux 内核 .clang-format, 适用于 STM32 嵌入式 C 项目。
+# 去掉了内核特有的 ForEachMacros, 保留核心风格规则。
+#
+# 参考: Documentation/process/coding-style.rst
+#       https://github.com/torvalds/linux/blob/master/.clang-format
 #
 # 手动使用: clang-format -i user/**/*.c user/**/*.h
 # ============================================================================
 
-Language: C
-BasedOnStyle: LLVM
-
-# 缩进
-IndentWidth: 4
-TabWidth: 4
-UseTab: Never
+---
+# 缩进: Tab, 宽度8
+IndentWidth: 8
+TabWidth: 8
+UseTab: Always
 IndentCaseLabels: false
+IndentGotoLabels: false
 IndentPPDirectives: None
-NamespaceIndentation: None
+IndentWrappedFunctionNames: false
 
-# 大括号
-BreakBeforeBraces: Attach
-AllowShortFunctionsOnASingleLine: Empty
-AllowShortIfStatementsOnASingleLine: Never
+# 大括号: 函数换行, 控制语句同行
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterClass: false
+  AfterNamespace: true
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+
+# 行宽: 80列
+ColumnLimit: 80
+
+# 短语句不合并
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
-
-# 行宽
-ColumnLimit: 120
 
 # 对齐
 AlignAfterOpenBracket: Align
-AlignConsecutiveMacros: true
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Left
 AlignOperands: true
-AlignTrailingComments: true
+AlignTrailingComments: false
 
 # 空格
 SpaceAfterCStyleCast: false
-SpaceBeforeParens: ControlStatements
-SpaceInEmptyBlock: false
+SpaceBeforeParens: ControlStatementsExceptForEachMacros
+SpaceInEmptyParentheses: false
 SpacesInParentheses: false
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInSquareBrackets: false
+SpacesBeforeTrailingComments: 1
 
-# 指针和引用
+# 指针: 右对齐 (char *ptr)
 PointerAlignment: Right
-ReferenceAlignment: Right
+DerivePointerAlignment: false
 
-# 包含排序
+# 包含排序: 不排序(CubeMX生成的头文件顺序有特殊要求)
 SortIncludes: false
+IncludeBlocks: Preserve
 
-# 注释
+# 注释: 不重新排版
 ReflowComments: false
 
 # 函数参数
-BinPackArguments: false
-BinPackParameters: false
-AllowAllParametersOfDeclarationOnNextLine: true
+BinPackArguments: true
+BinPackParameters: true
+AllowAllParametersOfDeclarationOnNextLine: false
 
 # 空行
-MaxEmptyLinesToKeep: 2
+MaxEmptyLinesToKeep: 1
 KeepEmptyLinesAtTheStartOfBlocks: false
 
-# switch
-IndentCaseLabels: true
-
-# typedef
+# 返回类型
 AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+
+# 二进制运算符
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: false
+
+# 续行缩进
+ContinuationIndentWidth: 8
+
+# C++ 相关(嵌入式项目通常不需要, 但保留兼容性)
+Standard: c++03
+Cpp11BracedListStyle: false
+BreakConstructorInitializersBeforeComma: false
+BreakConstructorInitializers: BeforeComma
+ConstructorInitializerIndentWidth: 8
+
+# 惩罚值(控制换行决策)
+PenaltyBreakAssignment: 10
+PenaltyBreakBeforeFirstCallParameter: 30
+PenaltyBreakComment: 10
+PenaltyBreakFirstLessLess: 0
+PenaltyBreakString: 10
+PenaltyExcessCharacter: 100
+PenaltyReturnTypeOnItsOwnLine: 60
+
+# 其他
+CompactNamespaces: false
+FixNamespaceComments: false
+SortUsingDeclarations: false
+BreakStringLiterals: false
+ExperimentalAutoDetectBinPacking: false

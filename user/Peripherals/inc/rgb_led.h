@@ -27,14 +27,14 @@ extern "C" {
  * 每个通道独立控制, 通过按位或组合颜色。
  * 例如: RGB_COLOR_YELLOW = RGB_COLOR_RED | RGB_COLOR_GREEN
  * ========================================================================= */
-#define RGB_COLOR_OFF       0x00
-#define RGB_COLOR_RED       0x01
-#define RGB_COLOR_GREEN     0x02
-#define RGB_COLOR_BLUE      0x04
-#define RGB_COLOR_YELLOW    (RGB_COLOR_RED | RGB_COLOR_GREEN)
-#define RGB_COLOR_CYAN      (RGB_COLOR_GREEN | RGB_COLOR_BLUE)
-#define RGB_COLOR_MAGENTA   (RGB_COLOR_RED | RGB_COLOR_BLUE)
-#define RGB_COLOR_WHITE     (RGB_COLOR_RED | RGB_COLOR_GREEN | RGB_COLOR_BLUE)
+#define RGB_COLOR_OFF 0x00
+#define RGB_COLOR_RED 0x01
+#define RGB_COLOR_GREEN 0x02
+#define RGB_COLOR_BLUE 0x04
+#define RGB_COLOR_YELLOW (RGB_COLOR_RED | RGB_COLOR_GREEN)
+#define RGB_COLOR_CYAN (RGB_COLOR_GREEN | RGB_COLOR_BLUE)
+#define RGB_COLOR_MAGENTA (RGB_COLOR_RED | RGB_COLOR_BLUE)
+#define RGB_COLOR_WHITE (RGB_COLOR_RED | RGB_COLOR_GREEN | RGB_COLOR_BLUE)
 
 /* 颜色类型 */
 typedef uint8_t rgb_color_t;

@@ -30,9 +30,9 @@
  * MAIN_THREAD_PREEMPT_THRESH  : 抢占阈值。通常与优先级相同。
  *                               设置为低于优先级可创建优先级继承区域(配合互斥锁使用)。
  * ========================================================================= */
-#define MAIN_THREAD_STACK_SIZE      1024
-#define MAIN_THREAD_PRIORITY        5
-#define MAIN_THREAD_PREEMPT_THRESH   5
+#define MAIN_THREAD_STACK_SIZE 1024
+#define MAIN_THREAD_PRIORITY 5
+#define MAIN_THREAD_PREEMPT_THRESH 5
 
 /* =========================================================================
  * 字节池配置
@@ -43,7 +43,7 @@
  * BYTE_POOL_SIZE : 可用于动态分配的总字节数。
  *                   如果应用需要更多堆内存, 请增大此值。
  * ========================================================================= */
-#define BYTE_POOL_SIZE              4096
+#define BYTE_POOL_SIZE 4096
 
 /* ThreadX对象 */
 static TX_THREAD main_thread;
@@ -68,24 +68,24 @@ static void main_thread_entry(ULONG thread_input);
  */
 void tx_application_define(VOID *first_free_memory)
 {
-    (void)first_free_memory;
+	(void)first_free_memory;
 
-    /* 创建字节池用于动态内存分配 */
-    tx_byte_pool_create(&byte_pool, "app_byte_pool", byte_pool_area, BYTE_POOL_SIZE);
+	/* 创建字节池用于动态内存分配 */
+	tx_byte_pool_create(&byte_pool, "app_byte_pool", byte_pool_area,
+			    BYTE_POOL_SIZE);
 
-    /* 创建主应用线程 */
-    tx_thread_create(&main_thread,
-                     "main_thread",          /* 线程名称(用于跟踪) */
-                     main_thread_entry,      /* 线程入口函数 */
-                     0,                      /* 线程输入参数 */
-                     main_thread_stack,      /* 栈起始地址 */
-                     MAIN_THREAD_STACK_SIZE, /* 栈大小(字节) */
-                     MAIN_THREAD_PRIORITY,   /* 优先级 */
-                     MAIN_THREAD_PREEMPT_THRESH, /* 抢占阈值 */
-                     TX_NO_TIME_SLICE,       /* 不使用时间片 */
-                     TX_AUTO_START);         /* 立即启动 */
+	/* 创建主应用线程 */
+	tx_thread_create(&main_thread, "main_thread", /* 线程名称(用于跟踪) */
+			 main_thread_entry, /* 线程入口函数 */
+			 0, /* 线程输入参数 */
+			 main_thread_stack, /* 栈起始地址 */
+			 MAIN_THREAD_STACK_SIZE, /* 栈大小(字节) */
+			 MAIN_THREAD_PRIORITY, /* 优先级 */
+			 MAIN_THREAD_PREEMPT_THRESH, /* 抢占阈值 */
+			 TX_NO_TIME_SLICE, /* 不使用时间片 */
+			 TX_AUTO_START); /* 立即启动 */
 
-    /*
+	/*
      * 示例: 创建额外线程
      *
      * static TX_THREAD worker_thread;
@@ -130,39 +130,33 @@ void tx_application_define(VOID *first_free_memory)
  */
 static void main_thread_entry(ULONG thread_input)
 {
-    (void)thread_input;
+	(void)thread_input;
 
-    /*
+	/*
      * 初始化需要在ThreadX运行后才能工作的外设。
      * HAL_Init()和MX_GPIO_Init()已在main()中tx_kernel_enter()之前执行,
      * 因此只需在此添加延迟初始化的外设。
      */
-    rgb_led_init();
+	rgb_led_init();
 
-    /* RGB LED颜色循环表 */
-    static const rgb_color_t color_table[] = {
-        RGB_COLOR_RED,
-        RGB_COLOR_GREEN,
-        RGB_COLOR_BLUE,
-        RGB_COLOR_YELLOW,
-        RGB_COLOR_CYAN,
-        RGB_COLOR_MAGENTA,
-        RGB_COLOR_WHITE,
-        RGB_COLOR_OFF,
-    };
-    #define COLOR_TABLE_SIZE (sizeof(color_table) / sizeof(color_table[0]))
+	/* RGB LED颜色循环表 */
+	static const rgb_color_t color_table[] = {
+		RGB_COLOR_RED,	  RGB_COLOR_GREEN, RGB_COLOR_BLUE,
+		RGB_COLOR_YELLOW, RGB_COLOR_CYAN,  RGB_COLOR_MAGENTA,
+		RGB_COLOR_WHITE,  RGB_COLOR_OFF,
+	};
+#define COLOR_TABLE_SIZE (sizeof(color_table) / sizeof(color_table[0]))
 
-    uint32_t color_index = 0;
+	uint32_t color_index = 0;
 
-    while (1)
-    {
-        /* 应用主循环 */
+	while (1) {
+		/* 应用主循环 */
 
-        /* 设置RGB LED颜色 */
-        rgb_led_set_color(color_table[color_index]);
-        color_index = (color_index + 1) % COLOR_TABLE_SIZE;
+		/* 设置RGB LED颜色 */
+		rgb_led_set_color(color_table[color_index]);
+		color_index = (color_index + 1) % COLOR_TABLE_SIZE;
 
-        /* 每500ms切换一次颜色 */
-        tx_thread_sleep(500);
-    }
+		/* 每500ms切换一次颜色 */
+		tx_thread_sleep(500);
+	}
 }

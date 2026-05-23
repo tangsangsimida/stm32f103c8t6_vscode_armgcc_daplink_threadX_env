@@ -43,9 +43,9 @@ extern void _tx_timer_interrupt(void);
  * [移植说明] SYSTEM_CLOCK_HZ必须与SystemClock_Config()中配置的实际SYSCLK频率一致。
  * 当前项目: HSE 8MHz * PLL x9 = 72MHz。修改时钟时需同步更新此值以保证节拍精度。
  */
-#define SYSTEM_CLOCK_HZ     72000000UL
-#define SYSTICK_FREQ_HZ     1000UL          /* 1ms节拍周期 */
-#define SYSTICK_RELOAD      (SYSTEM_CLOCK_HZ / SYSTICK_FREQ_HZ - 1)
+#define SYSTEM_CLOCK_HZ 72000000UL
+#define SYSTICK_FREQ_HZ 1000UL /* 1ms节拍周期 */
+#define SYSTICK_RELOAD (SYSTEM_CLOCK_HZ / SYSTICK_FREQ_HZ - 1)
 
 /*
  * 链接器符号: 已用RAM的末尾地址
@@ -75,27 +75,26 @@ extern VOID *_tx_initialize_unused_memory;
  */
 void _tx_initialize_low_level(void)
 {
-    __disable_irq();
+	__disable_irq();
 
-    /* 1. 告知ThreadX空闲堆内存起始地址 */
-    _tx_initialize_unused_memory = (VOID *)(((ULONG)&end) + 4);
+	/* 1. 告知ThreadX空闲堆内存起始地址 */
+	_tx_initialize_unused_memory = (VOID *)(((ULONG)&end) + 4);
 
-    /* 2. 从向量表(地址0x00000000)保存系统栈指针 */
-    _tx_thread_system_stack_ptr = *(ULONG *)0x00000000;
+	/* 2. 从向量表(地址0x00000000)保存系统栈指针 */
+	_tx_thread_system_stack_ptr = *(ULONG *)0x00000000;
 
-    /* 3. 使能DWT周期计数器, 用于ThreadX性能监控 */
-    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-    DWT->CYCCNT = 0;
-    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+	/* 3. 使能DWT周期计数器, 用于ThreadX性能监控 */
+	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+	DWT->CYCCNT = 0;
+	DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-    /* 4. 配置SysTick产生周期性1ms中断(ThreadX定时器源) */
-    SysTick->LOAD = SYSTICK_RELOAD;
-    SysTick->VAL  = 0;
-    SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk |
-                    SysTick_CTRL_TICKINT_Msk |
-                    SysTick_CTRL_ENABLE_Msk;
+	/* 4. 配置SysTick产生周期性1ms中断(ThreadX定时器源) */
+	SysTick->LOAD = SYSTICK_RELOAD;
+	SysTick->VAL = 0;
+	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk |
+			SysTick_CTRL_ENABLE_Msk;
 
-    /*
+	/*
      * 5. 设置中断处理函数优先级
      *
      * Cortex-M3 SHP寄存器布局(按字节寻址):
@@ -111,11 +110,11 @@ void _tx_initialize_low_level(void)
      *   - SVCall = 最低优先级(0xFF): 线程级服务调用
      *   - SysTick = 0x40: 可被更高优先级的ISR抢占
      */
-    SCB->SHP[7]  = 0xFF;        /* SVCall  = 最低优先级 */
-    SCB->SHP[10] = 0xFF;        /* PendSV  = 最低优先级 */
-    SCB->SHP[11] = 0x40;        /* SysTick = 中等优先级 */
+	SCB->SHP[7] = 0xFF; /* SVCall  = 最低优先级 */
+	SCB->SHP[10] = 0xFF; /* PendSV  = 最低优先级 */
+	SCB->SHP[11] = 0x40; /* SysTick = 中等优先级 */
 
-    __enable_irq();
+	__enable_irq();
 }
 
 /**
@@ -136,5 +135,5 @@ void _tx_initialize_low_level(void)
  */
 void SysTick_Handler(void)
 {
-    _tx_timer_interrupt();
+	_tx_timer_interrupt();
 }
