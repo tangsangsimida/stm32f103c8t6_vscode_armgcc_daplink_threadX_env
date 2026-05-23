@@ -29,8 +29,10 @@ static UCHAR thread_stack[DEMO_THREAD_STACK_SIZE];
 static void thread_entry(ULONG input);
 static void sleep_ticks(uint32_t ticks);
 static void show_color(rgb_color_t color, uint32_t ticks);
-static void show_color_pwm(rgb_color_t color, uint8_t brightness,
-			   uint32_t frame_ticks);
+static void show_color_brightness(rgb_color_t color,
+				  rgb_brightness_t brightness,
+				  uint32_t frame_ticks);
+static rgb_brightness_t scale_brightness(uint8_t value, uint8_t max);
 static void run_rainbow_cycle(const demo_thread_params_t *params);
 static void run_breath_cycle(const demo_thread_params_t *params);
 static void run_sparkle_cycle(const demo_thread_params_t *params);
@@ -82,34 +84,17 @@ static void show_color(rgb_color_t color, uint32_t ticks)
 	sleep_ticks(ticks);
 }
 
-static void show_color_pwm(rgb_color_t color, uint8_t brightness,
-			   uint32_t frame_ticks)
+static void show_color_brightness(rgb_color_t color,
+				  rgb_brightness_t brightness,
+				  uint32_t frame_ticks)
 {
-#define PWM_STEPS 8U
-	uint32_t on_ticks;
-	uint32_t off_ticks;
-	uint32_t unit_ticks;
+	rgb_led_set_color_brightness(color, brightness);
+	sleep_ticks(frame_ticks);
+}
 
-	if (brightness == 0U) {
-		rgb_led_off();
-		sleep_ticks(frame_ticks);
-		return;
-	}
-
-	if (brightness >= PWM_STEPS) {
-		show_color(color, frame_ticks);
-		return;
-	}
-
-	unit_ticks = APP_MIN_SLEEP_TICKS(frame_ticks / PWM_STEPS);
-	on_ticks = brightness * unit_ticks;
-	off_ticks = (PWM_STEPS - brightness) * unit_ticks;
-
-	rgb_led_set_color(color);
-	sleep_ticks(on_ticks);
-	rgb_led_off();
-	sleep_ticks(off_ticks);
-#undef PWM_STEPS
+static rgb_brightness_t scale_brightness(uint8_t value, uint8_t max)
+{
+	return (rgb_brightness_t)(((uint32_t)value * RGB_BRIGHTNESS_MAX) / max);
 }
 
 static void run_rainbow_cycle(const demo_thread_params_t *params)
@@ -145,13 +130,17 @@ static void run_breath_cycle(const demo_thread_params_t *params)
 	for (color = 0; color < BREATH_COLOR_COUNT; color++) {
 		for (repeat = 0; repeat < 3U; repeat++) {
 			for (brightness = 0; brightness <= 8U; brightness++)
-				show_color_pwm(breath_colors[color], brightness,
-					       params->breath_frame_ticks);
+				show_color_brightness(
+					breath_colors[color],
+					scale_brightness(brightness, 8U),
+					params->breath_frame_ticks);
 
 			for (brightness = 8U; brightness > 0U; brightness--)
-				show_color_pwm(breath_colors[color],
-					       (uint8_t)(brightness - 1U),
-					       params->breath_frame_ticks);
+				show_color_brightness(
+					breath_colors[color],
+					scale_brightness(
+						(uint8_t)(brightness - 1U), 8U),
+					params->breath_frame_ticks);
 		}
 	}
 

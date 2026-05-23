@@ -26,6 +26,12 @@
 			Error_Handler();  \
 	} while (0)
 
+#define APP_HAL_CHECK(expr)              \
+	do {                             \
+		if ((expr) != HAL_OK)    \
+			Error_Handler(); \
+	} while (0)
+
 /*
  * ThreadX 优先级数字越小，调度优先级越高。
  * 0-4   : 系统保留或紧急实时任务

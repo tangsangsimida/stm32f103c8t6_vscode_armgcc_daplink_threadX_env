@@ -5,11 +5,12 @@
  * 本文件不由CubeMX生成, CubeMX重新生成代码时不会覆盖。
  *
  * 硬件连接:
- *   - PA6 : RGB LED 红色通道
- *   - PA7 : RGB LED 绿色通道
- *   - PB0 : RGB LED 蓝色通道
+ *   - PA6 : TIM3_CH1, RGB LED 红色通道
+ *   - PA7 : TIM3_CH2, RGB LED 绿色通道
+ *   - PB0 : TIM3_CH3, RGB LED 蓝色通道
  *
- * 有效电平: 低电平点亮(GPIO_PIN_RESET), 高电平熄灭(GPIO_PIN_SET)
+ * 通过TIM3 PWM控制亮度。当前CubeMX配置Period=65535。
+ * 硬件为低电平点亮, 驱动内部会反向映射PWM占空比。
  */
 
 #ifndef __RGB_LED_H
@@ -38,12 +39,15 @@ extern "C" {
 
 /* 颜色类型 */
 typedef uint8_t rgb_color_t;
+typedef uint16_t rgb_brightness_t;
+
+#define RGB_BRIGHTNESS_MAX 65535U
 
 /**
- * @brief  初始化RGB LED引脚
+ * @brief  初始化RGB LED PWM输出
  *
- * 由MX_GPIO_Init()自动完成引脚配置, 本函数确保LED初始状态为熄灭。
- * 应在MX_GPIO_Init()之后调用。
+ * 由MX_TIM3_Init()完成PWM配置, 本函数启动三个PWM通道并确保LED熄灭。
+ * 应在MX_TIM3_Init()之后调用。
  */
 void rgb_led_init(void);
 
@@ -54,17 +58,26 @@ void rgb_led_init(void);
 void rgb_led_set_color(rgb_color_t color);
 
 /**
+ * @brief  设置RGB三通道亮度
+ * @param  red    红色亮度, 0~RGB_BRIGHTNESS_MAX
+ * @param  green  绿色亮度, 0~RGB_BRIGHTNESS_MAX
+ * @param  blue   蓝色亮度, 0~RGB_BRIGHTNESS_MAX
+ */
+void rgb_led_set_rgb(rgb_brightness_t red, rgb_brightness_t green,
+		     rgb_brightness_t blue);
+
+/**
+ * @brief  按基础颜色和整体亮度设置RGB LED
+ * @param  color       颜色掩码, 可用RGB_COLOR_xxx宏或按位组合
+ * @param  brightness  整体亮度, 0~RGB_BRIGHTNESS_MAX
+ */
+void rgb_led_set_color_brightness(rgb_color_t color,
+				  rgb_brightness_t brightness);
+
+/**
  * @brief  关闭RGB LED(所有通道熄灭)
  */
 void rgb_led_off(void);
-
-/**
- * @brief  设置单个通道状态
- * @param  pin_port  GPIO端口(如GPIOA)
- * @param  pin       GPIO引脚(如GPIO_PIN_6)
- * @param  state     GPIO_PIN_SET(熄灭) 或 GPIO_PIN_RESET(点亮)
- */
-void rgb_led_set_channel(GPIO_TypeDef *port, uint16_t pin, GPIO_PinState state);
 
 #ifdef __cplusplus
 }
