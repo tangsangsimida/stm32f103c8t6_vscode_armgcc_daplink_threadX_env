@@ -19,6 +19,7 @@
 
 #include "tx_api.h"
 #include "main.h"
+#include "rgb_led.h"
 
 /* =========================================================================
  * 线程配置
@@ -136,12 +137,32 @@ static void main_thread_entry(ULONG thread_input)
      * HAL_Init()和MX_GPIO_Init()已在main()中tx_kernel_enter()之前执行,
      * 因此只需在此添加延迟初始化的外设。
      */
+    rgb_led_init();
+
+    /* RGB LED颜色循环表 */
+    static const rgb_color_t color_table[] = {
+        RGB_COLOR_RED,
+        RGB_COLOR_GREEN,
+        RGB_COLOR_BLUE,
+        RGB_COLOR_YELLOW,
+        RGB_COLOR_CYAN,
+        RGB_COLOR_MAGENTA,
+        RGB_COLOR_WHITE,
+        RGB_COLOR_OFF,
+    };
+    #define COLOR_TABLE_SIZE (sizeof(color_table) / sizeof(color_table[0]))
+
+    uint32_t color_index = 0;
 
     while (1)
     {
         /* 应用主循环 */
 
-        /* 休眠1个节拍(1ms), 将CPU让给其他线程 */
-        tx_thread_sleep(1);
+        /* 设置RGB LED颜色 */
+        rgb_led_set_color(color_table[color_index]);
+        color_index = (color_index + 1) % COLOR_TABLE_SIZE;
+
+        /* 每500ms切换一次颜色 */
+        tx_thread_sleep(500);
     }
 }

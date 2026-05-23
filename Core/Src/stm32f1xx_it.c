@@ -167,12 +167,16 @@ void DebugMon_Handler(void)
 
 /**
   * @brief This function handles Pendable request for system service.
+  *
+  * [THREADX] PendSV_Handler 由ThreadX移植层提供(tx_thread_schedule.S)。
+  *           THREADX_HANDLER宏在下方USER CODE块中定义为__weak,
+  *           使此函数可被ThreadX的强定义覆盖。
   */
-void PendSV_Handler(void)
+/* USER CODE BEGIN PendSV_IRQn 0 */
+#define THREADX_HANDLER __weak
+/* USER CODE END PendSV_IRQn 0 */
+THREADX_HANDLER void PendSV_Handler(void)
 {
-  /* USER CODE BEGIN PendSV_IRQn 0 */
-
-  /* USER CODE END PendSV_IRQn 0 */
   /* USER CODE BEGIN PendSV_IRQn 1 */
 
   /* USER CODE END PendSV_IRQn 1 */
@@ -180,13 +184,15 @@ void PendSV_Handler(void)
 
 /**
   * @brief This function handles System tick timer.
+  *
+  * [THREADX] SysTick_Handler 由用户代码提供(tx_initialize_low_level.c)。
+  *           THREADX_HANDLER宏使此函数可被覆盖。
   */
-void SysTick_Handler(void)
+/* USER CODE BEGIN SysTick_IRQn 0 */
+
+/* USER CODE END SysTick_IRQn 0 */
+THREADX_HANDLER void SysTick_Handler(void)
 {
-  /* USER CODE BEGIN SysTick_IRQn 0 */
-
-  /* USER CODE END SysTick_IRQn 0 */
-
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
   /* USER CODE END SysTick_IRQn 1 */
