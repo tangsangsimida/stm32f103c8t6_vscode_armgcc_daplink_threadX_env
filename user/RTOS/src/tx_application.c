@@ -23,7 +23,7 @@
 #include "init.h"
 
 /* 字节池配置 */
-#define BYTE_POOL_SIZE  4096
+#define BYTE_POOL_SIZE 4096
 
 static TX_BYTE_POOL byte_pool;
 static UCHAR byte_pool_area[BYTE_POOL_SIZE] __attribute__((aligned(4)));
@@ -41,8 +41,8 @@ void tx_application_define(VOID *first_free_memory)
 	(void)first_free_memory;
 
 	/* 创建字节池 */
-	tx_byte_pool_create(&byte_pool, "app_byte_pool",
-			    byte_pool_area, BYTE_POOL_SIZE);
+	tx_byte_pool_create(&byte_pool, "app_byte_pool", byte_pool_area,
+			    BYTE_POOL_SIZE);
 
 	/* 自动调用所有 MODULE_INIT() 注册的初始化函数 */
 	initcall_run();

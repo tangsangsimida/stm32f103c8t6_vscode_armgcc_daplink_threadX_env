@@ -17,8 +17,8 @@
 #include "init.h"
 
 /* 线程配置 */
-#define THREAD_PRIORITY      10
-#define THREAD_STACK_SIZE    512
+#define THREAD_PRIORITY 10
+#define THREAD_STACK_SIZE 512
 #define THREAD_PREEMPT_THRESH THREAD_PRIORITY
 
 /* ThreadX 对象(本文件私有) */
@@ -36,9 +36,9 @@ static void thread_entry(ULONG input);
 void template_thread_init(void)
 {
 	tx_thread_create(&thread, "template_thread", thread_entry, 0,
-			 thread_stack, THREAD_STACK_SIZE,
-			 THREAD_PRIORITY, THREAD_PREEMPT_THRESH,
-			 TX_NO_TIME_SLICE, TX_AUTO_START);
+			 thread_stack, THREAD_STACK_SIZE, THREAD_PRIORITY,
+			 THREAD_PREEMPT_THRESH, TX_NO_TIME_SLICE,
+			 TX_AUTO_START);
 }
 
 /**

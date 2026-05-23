@@ -22,8 +22,8 @@
  * 放在文件作用域(函数外), 将 fn 的函数指针放入 .initcall section。
  * 链接后, initcall_run() 会自动调用 fn。
  */
-#define MODULE_INIT(fn)                                                    \
-	static void (*__initcall_##fn)(void)                               \
+#define MODULE_INIT(fn)                      \
+	static void (*__initcall_##fn)(void) \
 		__attribute__((used, section(".initcall"))) = fn
 
 /**
