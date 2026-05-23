@@ -40,6 +40,7 @@ cmake --build build/Debug --target clean
 
 python3 tools/python/format_code.py
 python3 tools/python/format_code.py --check
+tools/check.sh
 ```
 
 ## 目录入口
@@ -57,8 +58,9 @@ docs/                 详细项目文档
 ## 文档
 
 - [开发环境配置](docs/development.md)：支持的系统、工具链、构建、烧录和格式化命令。
-- [项目结构与 CubeMX 集成](docs/project-structure.md)：目录职责、自动收集规则、CubeMX 重新生成注意事项。
-- [ThreadX 线程架构](docs/thread-architecture.md)：线程模板、自动注册、强类型参数传递和线程间通信。
+- [项目结构与 CubeMX 集成](docs/project-structure.md)：目录职责、CubeMX 修改边界、内存占用和重新生成注意事项。
+- [ThreadX 线程架构](docs/thread-architecture.md)：线程模板、自动注册、优先级约定、强类型参数传递和线程间通信。
+- [示例代码](docs/examples/README.md)：不参与构建的线程模板和队列通信示例。
 
 ## 许可证
 

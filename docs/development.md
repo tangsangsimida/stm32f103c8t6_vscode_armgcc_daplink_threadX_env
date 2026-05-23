@@ -69,3 +69,13 @@ python3 tools/python/format_code.py
 python3 tools/python/format_code.py --check
 python3 tools/python/format_code.py -v
 ```
+
+## 提交前检查
+
+运行本地检查脚本，确认格式、CMake 配置和 Debug 构建都通过：
+
+```bash
+tools/check.sh
+```
+
+该脚本不会烧录硬件；涉及外设行为的改动仍需在目标板上做 smoke test。

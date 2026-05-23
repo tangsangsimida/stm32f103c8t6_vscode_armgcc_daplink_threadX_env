@@ -6,19 +6,18 @@
  */
 
 #include "demo_thread.h"
-#include "tx_api.h"
+#include "app_config.h"
 #include "init.h"
-#include "main.h"
 #include "rgb_led.h"
 
 /* 线程配置 */
-#define DEMO_THREAD_PRIORITY 5
+#define DEMO_THREAD_PRIORITY APP_PRIO_REALTIME_MIN
 #define DEMO_THREAD_STACK_SIZE 1024
 #define DEMO_THREAD_PREEMPT_THRESH DEMO_THREAD_PRIORITY
 
 /* 默认参数 */
 static const demo_thread_params_t default_params = {
-	.color_cycle_ticks = 500,
+	.color_cycle_ticks = APP_MS_TO_TICKS(500),
 };
 
 /* ThreadX 对象(本文件私有) */
@@ -39,18 +38,13 @@ static void thread_entry(ULONG input);
  */
 void demo_thread_init(const demo_thread_params_t *params)
 {
-	UINT status;
-
 	if (!params)
 		params = &default_params;
 
-	status = tx_thread_create(&thread, "demo_thread", thread_entry,
-				  (ULONG)params, thread_stack,
-				  DEMO_THREAD_STACK_SIZE, DEMO_THREAD_PRIORITY,
-				  DEMO_THREAD_PREEMPT_THRESH, TX_NO_TIME_SLICE,
-				  TX_AUTO_START);
-	if (status != TX_SUCCESS)
-		Error_Handler();
+	APP_TX_CHECK(tx_thread_create(
+		&thread, "demo_thread", thread_entry, (ULONG)params,
+		thread_stack, DEMO_THREAD_STACK_SIZE, DEMO_THREAD_PRIORITY,
+		DEMO_THREAD_PREEMPT_THRESH, TX_NO_TIME_SLICE, TX_AUTO_START));
 }
 
 static void thread_entry(ULONG input)
@@ -72,9 +66,7 @@ static void thread_entry(ULONG input)
 	while (1) {
 		rgb_led_set_color(color_table[color_index]);
 		color_index = (color_index + 1) % COLOR_TABLE_SIZE;
-		tx_thread_sleep(params->color_cycle_ticks ?
-					params->color_cycle_ticks :
-					1);
+		tx_thread_sleep(APP_MIN_SLEEP_TICKS(params->color_cycle_ticks));
 	}
 }
 

@@ -20,9 +20,8 @@
  */
 
 #include "template_thread.h"
-#include "tx_api.h"
+#include "app_config.h"
 #include "init.h"
-#include "main.h"
 
 /* 线程配置 */
 #define THREAD_PRIORITY 10
@@ -31,7 +30,7 @@
 
 /* 默认参数 */
 static const template_thread_params_t default_params = {
-	.interval_ticks = 1000,
+	.interval_ticks = APP_MS_TO_TICKS(1000),
 	.flags = 0,
 	.user_data = NULL,
 };
@@ -54,18 +53,13 @@ static void thread_entry(ULONG input);
  */
 void template_thread_init(const template_thread_params_t *params)
 {
-	UINT status;
-
 	if (!params)
 		params = &default_params;
 
-	status = tx_thread_create(&thread, "template_thread", thread_entry,
-				  (ULONG)params, thread_stack,
-				  THREAD_STACK_SIZE, THREAD_PRIORITY,
-				  THREAD_PREEMPT_THRESH, TX_NO_TIME_SLICE,
-				  TX_AUTO_START);
-	if (status != TX_SUCCESS)
-		Error_Handler();
+	APP_TX_CHECK(tx_thread_create(
+		&thread, "template_thread", thread_entry, (ULONG)params,
+		thread_stack, THREAD_STACK_SIZE, THREAD_PRIORITY,
+		THREAD_PREEMPT_THRESH, TX_NO_TIME_SLICE, TX_AUTO_START));
 }
 
 /**
@@ -87,8 +81,7 @@ static void thread_entry(ULONG input)
 		/* TODO: 在此添加业务逻辑, 通过 params-> 访问参数 */
 
 		/* 必须调用阻塞API, 否则会饿死低优先级线程 */
-		tx_thread_sleep(
-			params->interval_ticks ? params->interval_ticks : 1);
+		tx_thread_sleep(APP_MIN_SLEEP_TICKS(params->interval_ticks));
 	}
 }
 
