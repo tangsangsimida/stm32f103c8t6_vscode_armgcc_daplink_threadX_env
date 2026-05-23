@@ -15,6 +15,7 @@ cmake/                工具链和 CubeMX 生成的 CMake 配置
 user/                 手写业务代码
 tools/                维护脚本
 docs/                 项目文档
+docs/examples/        不参与构建的代码模板
 ```
 
 ## 用户代码组织

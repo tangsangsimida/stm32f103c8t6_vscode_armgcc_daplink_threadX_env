@@ -6,6 +6,8 @@
 
 每个线程使用独立的 `.c` + `.h` 文件对，放在 `user/Application/` 中。`tx_application.c` 只负责创建字节池并调用 `initcall_run()`，不直接包含或调用具体线程。
 
+线程模板放在 `docs/examples/`，不会参与默认固件构建。复制到 `user/Application/` 后再按实际模块改名和启用。
+
 ## 自动注册
 
 线程模块通过 `MODULE_INIT()` 或 `MODULE_INIT_DEFAULT()` 把初始化函数注册到 `.initcall` section。链接脚本保留该 section，运行时由 `initcall_run()` 遍历调用。
@@ -25,17 +27,22 @@ MODULE_INIT(my_thread_init);
 
 ```c
 static const my_thread_params_t default_params = {
-	.interval_ms = 500,
+	.interval_ticks = 500,
 };
 
-void my_thread_init(const void *ctx)
+void my_thread_init(const my_thread_params_t *params)
 {
-	if (!ctx)
-		ctx = &default_params;
+	UINT status;
 
-	tx_thread_create(&thread, "my_thread", thread_entry, (ULONG)ctx,
-			 thread_stack, THREAD_STACK_SIZE, THREAD_PRIORITY,
-			 THREAD_PRIORITY, TX_NO_TIME_SLICE, TX_AUTO_START);
+	if (!params)
+		params = &default_params;
+
+	status = tx_thread_create(&thread, "my_thread", thread_entry,
+				  (ULONG)params, thread_stack, THREAD_STACK_SIZE,
+				  THREAD_PRIORITY, THREAD_PRIORITY,
+				  TX_NO_TIME_SLICE, TX_AUTO_START);
+	if (status != TX_SUCCESS)
+		Error_Handler();
 }
 
 MODULE_INIT_DEFAULT(my_thread_init, default_params);
@@ -46,8 +53,8 @@ MODULE_INIT_DEFAULT(my_thread_init, default_params);
 1. 复制模板文件：
 
    ```bash
-   cp user/Application/src/template_thread.c user/Application/src/your_thread.c
-   cp user/Application/inc/template_thread.h user/Application/inc/your_thread.h
+   cp docs/examples/template_thread.c user/Application/src/your_thread.c
+   cp docs/examples/template_thread.h user/Application/inc/your_thread.h
    ```
 
 2. 全局替换 `template` 为 `your_thread`。
@@ -58,7 +65,11 @@ MODULE_INIT_DEFAULT(my_thread_init, default_params);
 
 ## 参数传递
 
-`tx_thread_create()` 的入口参数类型为 `ULONG`。当前目标是 32 位 Cortex-M3，指针宽度与 `ULONG` 匹配，因此可以把静态参数结构体地址传给线程入口。外部传参时，调用者必须保证参数对象在线程生命周期内有效。
+线程初始化函数应使用强类型参数，例如 `const my_thread_params_t *params`，不要在公共接口中暴露 `const void *`。参数结构体定义在头文件中，调用方可以类型安全地构造自定义参数。
+
+`tx_thread_create()` 的入口参数类型为 `ULONG`。当前目标是 32 位 Cortex-M3，指针宽度与 `ULONG` 匹配，因此可以把参数结构体地址传给线程入口。外部传参时，调用者必须保证参数对象在线程生命周期内有效。
+
+`tx_thread_sleep()` 接收的是 ThreadX tick，不是毫秒。当前底层配置为 1ms tick，但模板字段仍使用 `*_ticks` 命名，避免以后修改 tick 频率时产生误解。传入 sleep 的 tick 值至少为 1，防止线程进入无阻塞忙循环。
 
 ## 线程间通信
 

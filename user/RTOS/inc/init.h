@@ -34,15 +34,15 @@
 /**
  * @brief  自动注册带默认参数的初始化函数
  *
- * 用于 xxx_thread_init(const void *ctx) 签名的函数。
+ * 用于 xxx_thread_init(const xxx_params_t *params) 形式的初始化函数。
  * 自动生成 wrapper, 调用时传入 &default_params 作为默认参数。
  *
  * 用法:
  *   static const my_params_t default_params = { ... };
- *   void my_thread_init(const void *ctx) { ... }
+ *   void my_thread_init(const my_params_t *params) { ... }
  *   MODULE_INIT_DEFAULT(my_thread_init, default_params);
  *
- * @param  fn    初始化函数名, 签名须为 void fn(const void *ctx)
+ * @param  fn    初始化函数名, 参数类型须能接收 &def
  * @param  def   默认参数变量名(须为 static 生命周期)
  */
 #define MODULE_INIT_DEFAULT(fn, def)                          \

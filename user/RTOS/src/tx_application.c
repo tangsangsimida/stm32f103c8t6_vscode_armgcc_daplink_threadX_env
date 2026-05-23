@@ -10,9 +10,9 @@
  *        无需在本文件中手动 #include 或调用。
  *
  *        添加新线程步骤:
- *          1. 复制 template_thread.c/h → your_thread.c/h
+ *          1. 复制 docs/examples/template_thread.c/h → user/Application/
  *          2. 全局替换 template → your_thread
- *          3. 在 your_thread.c 中使用 MODULE_INIT(your_thread_init);
+ *          3. 在 your_thread.c 中使用 MODULE_INIT_DEFAULT()
  *          4. 重新编译即可, 无需修改本文件
  *
  * [移植说明] 本文件与MCU无关, 更换MCU时无需修改。

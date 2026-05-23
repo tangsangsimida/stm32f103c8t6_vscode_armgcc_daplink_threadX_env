@@ -8,6 +8,7 @@
 #include "main_thread.h"
 #include "tx_api.h"
 #include "init.h"
+#include "main.h"
 #include "rgb_led.h"
 
 /* 线程配置 */
@@ -17,7 +18,7 @@
 
 /* 默认参数 */
 static const main_thread_params_t default_params = {
-	.color_cycle_ms = 500,
+	.color_cycle_ticks = 500,
 };
 
 /* ThreadX 对象(本文件私有) */
@@ -30,21 +31,26 @@ static void thread_entry(ULONG input);
 /**
  * @brief  初始化并启动主应用线程
  *
- * @param  ctx  指向参数结构体的指针, 传 NULL 使用默认参数。
- *              调用者需保证 ctx 指向的内存在线程运行期间有效。
+ * @param  params  指向 main_thread_params_t 的指针, 传 NULL 使用默认参数。
+ *                 调用者需保证 params 指向的内存在线程运行期间有效。
  *
  * 由 MODULE_INIT_DEFAULT() 自动注册(使用默认参数),
  * 也可被其他模块直接调用以传入自定义参数。
  */
-void main_thread_init(const void *ctx)
+void main_thread_init(const main_thread_params_t *params)
 {
-	if (!ctx)
-		ctx = &default_params;
+	UINT status;
 
-	tx_thread_create(&thread, "main_thread", thread_entry, (ULONG)ctx,
-			 thread_stack, MAIN_THREAD_STACK_SIZE,
-			 MAIN_THREAD_PRIORITY, MAIN_THREAD_PREEMPT_THRESH,
-			 TX_NO_TIME_SLICE, TX_AUTO_START);
+	if (!params)
+		params = &default_params;
+
+	status = tx_thread_create(&thread, "main_thread", thread_entry,
+				  (ULONG)params, thread_stack,
+				  MAIN_THREAD_STACK_SIZE, MAIN_THREAD_PRIORITY,
+				  MAIN_THREAD_PREEMPT_THRESH, TX_NO_TIME_SLICE,
+				  TX_AUTO_START);
+	if (status != TX_SUCCESS)
+		Error_Handler();
 }
 
 static void thread_entry(ULONG input)
@@ -66,8 +72,9 @@ static void thread_entry(ULONG input)
 	while (1) {
 		rgb_led_set_color(color_table[color_index]);
 		color_index = (color_index + 1) % COLOR_TABLE_SIZE;
-		tx_thread_sleep(
-			params->color_cycle_ms ? params->color_cycle_ms : 1);
+		tx_thread_sleep(params->color_cycle_ticks ?
+					params->color_cycle_ticks :
+					1);
 	}
 }
 
