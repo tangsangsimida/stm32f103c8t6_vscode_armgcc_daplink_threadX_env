@@ -1,0 +1,68 @@
+# ============================================================================
+# clang-format 配置
+#
+# 基于项目现有代码风格, 适用于STM32嵌入式C项目。
+# VS Code安装clang-format插件后, 保存时自动格式化。
+#
+# 手动使用: clang-format -i user/**/*.c user/**/*.h
+# ============================================================================
+
+Language: C
+BasedOnStyle: LLVM
+
+# 缩进
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+IndentCaseLabels: false
+IndentPPDirectives: None
+NamespaceIndentation: None
+
+# 大括号
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+
+# 行宽
+ColumnLimit: 120
+
+# 对齐
+AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: true
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignEscapedNewlines: Left
+AlignOperands: true
+AlignTrailingComments: true
+
+# 空格
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyBlock: false
+SpacesInParentheses: false
+
+# 指针和引用
+PointerAlignment: Right
+ReferenceAlignment: Right
+
+# 包含排序
+SortIncludes: false
+
+# 注释
+ReflowComments: false
+
+# 函数参数
+BinPackArguments: false
+BinPackParameters: false
+AllowAllParametersOfDeclarationOnNextLine: true
+
+# 空行
+MaxEmptyLinesToKeep: 2
+KeepEmptyLinesAtTheStartOfBlocks: false
+
+# switch
+IndentCaseLabels: true
+
+# typedef
+AlwaysBreakAfterDefinitionReturnType: None
