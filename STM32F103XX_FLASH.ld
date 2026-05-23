@@ -103,6 +103,24 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  /*
+   * .initcall section — Linux内核风格自动初始化注册
+   *
+   * MODULE_INIT(fn) 宏将函数指针放入此 section, 链接器自动收集
+   * 所有注册的初始化函数。运行时由 initcall_run() 遍历调用。
+   *
+   * KEEP() 防止链接器 --gc-sections 移除未被直接引用的函数指针。
+   * __initcall_start / __initcall_end 供 init.h 中的 initcall_run() 使用。
+   */
+  .initcall :
+  {
+    . = ALIGN(4);
+    __initcall_start = .;
+    KEEP(*(.initcall))
+    __initcall_end = .;
+    . = ALIGN(4);
+  } >FLASH
+
   .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
   {
     . = ALIGN(4);

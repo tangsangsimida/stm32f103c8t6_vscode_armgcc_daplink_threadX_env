@@ -7,6 +7,7 @@
 
 #include "main_thread.h"
 #include "tx_api.h"
+#include "init.h"
 #include "rgb_led.h"
 
 /* 线程配置 */
@@ -55,3 +56,5 @@ static void thread_entry(ULONG input)
         tx_thread_sleep(500);
     }
 }
+
+MODULE_INIT(main_thread_init);

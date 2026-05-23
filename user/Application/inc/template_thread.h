@@ -13,7 +13,7 @@ extern "C" {
 /**
  * @brief  初始化并启动 template 线程
  *
- * 由 tx_application_define() 调用。线程在函数内部自动创建并启动。
+ * 通过 MODULE_INIT() 宏自动注册, 无需手动调用。
  */
 void template_thread_init(void);
 

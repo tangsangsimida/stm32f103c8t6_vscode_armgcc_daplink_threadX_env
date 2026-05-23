@@ -5,22 +5,22 @@
  * 本文件不由CubeMX生成, CubeMX重新生成代码时不会覆盖。
  *
  * =============================================================================
- * [说明] 本文件只负责创建字节池和调用各线程的初始化函数。
- *        每个线程的实现位于独立的 Application/src/xxx_thread.c 文件中。
- *        添加新线程只需:
- *          1. 创建 Application/src/xxx_thread.c 和 Application/inc/xxx_thread.h
- *          2. 在下方 #include 并调用 xxx_thread_init()
- *          3. 重新编译, 无需修改 CMakeLists.txt
+ * [说明] 本文件只负责创建字节池并启动自动初始化。
+ *        每个模块使用 MODULE_INIT(fn) 宏自动注册初始化函数,
+ *        无需在本文件中手动 #include 或调用。
+ *
+ *        添加新线程步骤:
+ *          1. 复制 template_thread.c/h → your_thread.c/h
+ *          2. 全局替换 template → your_thread
+ *          3. 在 your_thread.c 中使用 MODULE_INIT(your_thread_init);
+ *          4. 重新编译即可, 无需修改本文件
  *
  * [移植说明] 本文件与MCU无关, 更换MCU时无需修改。
  * =============================================================================
  */
 
 #include "tx_api.h"
-
-/* 线程头文件 — 添加新线程时在此 #include */
-#include "main_thread.h"
-/* #include "your_thread.h" */
+#include "init.h"
 
 /* 字节池配置 */
 #define BYTE_POOL_SIZE  4096
@@ -32,7 +32,7 @@ static UCHAR byte_pool_area[BYTE_POOL_SIZE] __attribute__((aligned(4)));
  * @brief  ThreadX应用定义函数
  *
  * 由 tx_kernel_enter() 在 _tx_initialize_low_level() 完成后调用。
- * 在此创建字节池并调用各线程的初始化函数。
+ * 在此创建字节池并自动调用所有 MODULE_INIT() 注册的初始化函数。
  *
  * 注意: 不要从本函数返回。ThreadX调度器在本函数完成后启动。
  */
@@ -44,7 +44,6 @@ void tx_application_define(VOID *first_free_memory)
 	tx_byte_pool_create(&byte_pool, "app_byte_pool",
 			    byte_pool_area, BYTE_POOL_SIZE);
 
-	/* 注册所有线程 — 每个线程自行创建ThreadX对象 */
-	main_thread_init();
-	/* your_thread_init(); */
+	/* 自动调用所有 MODULE_INIT() 注册的初始化函数 */
+	initcall_run();
 }
