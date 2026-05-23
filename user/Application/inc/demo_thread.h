@@ -18,7 +18,8 @@ extern "C" {
  * 定义在头文件中, 外部模块可构造自定义参数传入 init 函数。
  */
 typedef struct {
-	uint32_t color_cycle_ticks; /* 颜色切换间隔(tick), 最小值 1 */
+	uint32_t color_step_ticks; /* 颜色切换间隔(tick), 最小值 1 */
+	uint32_t breath_frame_ticks; /* 呼吸灯PWM帧间隔(tick), 最小值 1 */
 } demo_thread_params_t;
 
 /**
