@@ -5,12 +5,18 @@
 #
 # 目录结构:
 #   user/
-#   +-- Application/
-#   |   +-- inc/    (应用层头文件)
-#   |   +-- src/    (应用层源文件)
-#   +-- Peripherals/
-#       +-- inc/    (外设驱动头文件)
-#       +-- src/    (外设驱动源文件)
+#   +-- Application/    (应用层 - 业务逻辑)
+#   |   +-- inc/
+#   |   +-- src/
+#   +-- RTOS/           (RTOS胶水层 - ThreadX初始化和任务定义)
+#   |   +-- inc/
+#   |   +-- src/
+#   +-- Modules/        (模块层 - 中间件应用代码)
+#   |   +-- inc/
+#   |   +-- src/
+#   +-- Peripherals/    (驱动层 - 可复用硬件驱动)
+#       +-- inc/
+#       +-- src/
 #
 # inc/和src/下的子目录会被自动递归收集。
 #
@@ -27,6 +33,10 @@
 file(GLOB_RECURSE USER_Include_Dirs_ABS
     "${CMAKE_CURRENT_SOURCE_DIR}/Application/inc/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Application/inc/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/RTOS/inc/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/RTOS/inc/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Modules/inc/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Modules/inc/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/Peripherals/inc/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/Peripherals/inc/*.hpp"
 )
@@ -46,6 +56,16 @@ file(GLOB_RECURSE USER_Application_Src
     "${CMAKE_CURRENT_SOURCE_DIR}/Application/src/*.cpp"
 )
 
+file(GLOB_RECURSE USER_RTOS_Src
+    "${CMAKE_CURRENT_SOURCE_DIR}/RTOS/src/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/RTOS/src/*.cpp"
+)
+
+file(GLOB_RECURSE USER_Modules_Src
+    "${CMAKE_CURRENT_SOURCE_DIR}/Modules/src/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Modules/src/*.cpp"
+)
+
 file(GLOB_RECURSE USER_Peripherals_Src
     "${CMAKE_CURRENT_SOURCE_DIR}/Peripherals/src/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Peripherals/src/*.cpp"
@@ -53,6 +73,8 @@ file(GLOB_RECURSE USER_Peripherals_Src
 
 set(USER_Sources
     ${USER_Application_Src}
+    ${USER_RTOS_Src}
+    ${USER_Modules_Src}
     ${USER_Peripherals_Src}
 )
 
@@ -73,7 +95,7 @@ target_sources(user_objects PRIVATE
     ${USER_Sources}
 )
 
-target_link_libraries(user_objects PUBLIC user_interface stm32cubemx STM32_Drivers)
+target_link_libraries(user_objects PUBLIC user_interface stm32cubemx STM32_Drivers threadx_core)
 
 # 将变量暴露给父级CMakeLists.txt(用于ThreadX头文件路径传递)
 set(USER_Sources ${USER_Sources} PARENT_SCOPE)

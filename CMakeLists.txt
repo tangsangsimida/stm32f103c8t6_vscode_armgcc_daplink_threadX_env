@@ -49,23 +49,21 @@ add_executable(${CMAKE_PROJECT_NAME})
 add_subdirectory(cmake/stm32cubemx)
 
 # ---------------------------------------------------------------------------
-# ThreadX实时操作系统
+# 中间件: ThreadX实时操作系统
 #
-# common/        - 平台无关的ThreadX内核(C源文件)
-# cortex_m3/gnu/ - Cortex-M3专用移植(汇编: 上下文切换、定时器中断)
+# Middlewares/ThreadX/ 包含:
+#   common/   - 平台无关内核(185个.c文件)
+#   port/gnu/ - Cortex-M3/GNU移植(7个.S汇编文件)
 #
-# [移植说明] 如果更换ARM内核(如Cortex-M4/M7), 需要将cortex_m3/替换为
-#            对应的移植目录(cortex_m4/、cortex_m7/等)。
-#            common/目录对所有内核通用, 无需修改。
+# 提供CMake目标:
+#   threadx_kernel - OBJECT库, 内核源文件编译产物
+#   threadx_port   - OBJECT库, 移植层汇编编译产物
+#   threadx_core   - INTERFACE库, 聚合以上两者并导出头文件路径
+#
+# [移植说明] 切换ARM内核时, 修改 Middlewares/ThreadX/CMakeLists.txt
+#            中的 THREADX_PORT_DIR 变量。
 # ---------------------------------------------------------------------------
-add_subdirectory(common)
-add_subdirectory(cortex_m3/gnu)
-
-# ThreadX头文件路径(供用户代码调用ThreadX API时使用)
-set(THREADX_Include_Dirs
-    ${CMAKE_SOURCE_DIR}/common/inc
-    ${CMAKE_SOURCE_DIR}/cortex_m3/gnu/inc
-)
+add_subdirectory(Middlewares/ThreadX)
 
 # ---------------------------------------------------------------------------
 # 用户应用代码
@@ -77,8 +75,7 @@ set(THREADX_Include_Dirs
 # ---------------------------------------------------------------------------
 add_subdirectory(user)
 
-# 将ThreadX头文件路径传递给用户代码目标
-target_include_directories(user_objects PUBLIC ${THREADX_Include_Dirs})
+# ThreadX头文件路径通过threadx_core INTERFACE依赖自动传递给用户代码
 
 # 链接目录设置
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
@@ -106,6 +103,8 @@ list(REMOVE_ITEM CMAKE_C_IMPLICIT_LINK_LIBRARIES ob)
 # 链接库
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
+    threadx_kernel
+    threadx_port
     user_objects
     # 在此添加用户自定义库
 )
