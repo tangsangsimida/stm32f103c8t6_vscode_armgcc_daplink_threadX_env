@@ -19,8 +19,9 @@ extern "C" {
  * 所有时间字段单位均为ThreadX tick, 不是毫秒。
  */
 typedef struct {
-	uint32_t color_step_ticks; /* 颜色切换间隔(tick), 最小值 1 */
-	uint32_t breath_frame_ticks; /* 呼吸灯PWM帧间隔(tick), 最小值 1 */
+	uint32_t frame_ticks; /* 每一帧间隔(tick), 最小值 1 */
+	uint8_t hue_step; /* 每帧色相步进, 传0时按1处理 */
+	uint8_t breath_step; /* 每帧呼吸相位步进, 传0时按1处理 */
 } demo_thread_params_t;
 
 /**
