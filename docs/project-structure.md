@@ -38,6 +38,29 @@ user/
 
 新增 `.c` / `.cpp` 文件放入对应层级的 `src/`，新增 `.h` / `.hpp` 文件放入 `inc/`。子目录会被递归处理。
 
+## 注释规范
+
+`user/` 中手写代码使用轻量 Doxygen 风格注释，目标是说明模块意图、接口契约和硬件/RTOS 约束，不重复描述显而易见的语句。
+
+- 每个 `.c` / `.h` 文件顶部必须包含 `@file` 和 `@brief`。
+- 头文件中的公开类型、宏和函数必须说明用途；函数至少写 `@brief`，有参数时逐一写 `@param`，有返回值时写 `@return`。
+- `.c` 文件中的私有 helper 只有在行为、单位、硬件约束或算法不直观时才加注释；一旦写函数头注释，也必须补齐 `@param` / `@return`。
+- ThreadX 相关注释应明确单位和生命周期，例如 tick 不是 ms、参数对象必须在线程生命周期内有效。
+- 硬件驱动注释应写明外设通道、有效电平、CubeMX 配置依赖和是否会被重新生成覆盖。
+- 避免逐行注释和空泛注释，例如“设置变量”“调用函数”；让函数名和局部变量名承担这类说明。
+
+示例：
+
+```c
+/**
+ * @brief  按基础颜色和整体亮度设置RGB LED
+ * @param  color       颜色掩码, 可用RGB_COLOR_xxx宏或按位组合
+ * @param  brightness  整体亮度, 0~RGB_BRIGHTNESS_MAX
+ */
+void rgb_led_set_color_brightness(rgb_color_t color,
+				  rgb_brightness_t brightness);
+```
+
 ## 修改边界
 
 - `Core/`：CubeMX 生成区，只在 `USER CODE BEGIN/END` 块内保留手写代码。

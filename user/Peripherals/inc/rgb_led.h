@@ -48,6 +48,8 @@ typedef uint16_t rgb_brightness_t;
  *
  * 由MX_TIM3_Init()完成PWM配置, 本函数启动三个PWM通道并确保LED熄灭。
  * 应在MX_TIM3_Init()之后调用。
+ *
+ * @note   会启动TIM3_CH1/CH2/CH3。
  */
 void rgb_led_init(void);
 
@@ -76,6 +78,8 @@ void rgb_led_set_color_brightness(rgb_color_t color,
 
 /**
  * @brief  关闭RGB LED(所有通道熄灭)
+ *
+ * @note   关闭表示逻辑亮度为0, 驱动内部会根据低电平点亮硬件反相映射。
  */
 void rgb_led_off(void);
 

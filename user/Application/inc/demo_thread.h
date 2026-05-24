@@ -16,6 +16,7 @@ extern "C" {
  * @brief  演示线程参数结构体
  *
  * 定义在头文件中, 外部模块可构造自定义参数传入 init 函数。
+ * 所有时间字段单位均为ThreadX tick, 不是毫秒。
  */
 typedef struct {
 	uint32_t color_step_ticks; /* 颜色切换间隔(tick), 最小值 1 */
