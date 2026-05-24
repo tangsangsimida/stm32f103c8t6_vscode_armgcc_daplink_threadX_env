@@ -62,13 +62,23 @@ void demo_thread_init(const demo_thread_params_t *params)
 		DEMO_THREAD_PREEMPT_THRESH, TX_NO_TIME_SLICE, TX_AUTO_START));
 }
 
+/**
+ * @brief 线程入口函数，负责初始化RGB LED并执行环境光循环任务。
+ *
+ * @param input 传入的参数指针，需强制转换为 demo_thread_params_t 类型，包含线程运行所需的配置信息。
+ *
+ * @return 无返回值。
+ */
 static void thread_entry(ULONG input)
 {
+	/* 将输入参数转换为线程参数结构体指针 */
 	const demo_thread_params_t *params =
 		(const demo_thread_params_t *)input;
 
+	/* 初始化RGB LED硬件 */
 	rgb_led_init();
 
+	/* 运行环境光检测与控制主循环 */
 	run_ambient_loop(params);
 }
 
