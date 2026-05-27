@@ -60,6 +60,7 @@ docs/                 详细项目文档
 - [开发环境配置](docs/development.md)：支持的系统、工具链、构建、烧录和格式化命令。
 - [项目结构与 CubeMX 集成](docs/project-structure.md)：目录职责、CubeMX 修改边界、内存占用和重新生成注意事项。
 - [ThreadX 线程架构](docs/thread-architecture.md)：线程模板、自动注册、优先级约定、强类型参数传递和线程间通信。
+- [Arch Linux 环境配置](docs/archlinux-setup.md)：Arch Linux 下的工具链安装、构建、烧录和 udev 规则。
 - [示例代码](docs/examples/README.md)：不参与构建的线程模板和队列通信示例。
 
 ## 许可证

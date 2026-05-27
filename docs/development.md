@@ -21,11 +21,19 @@
 | `clang-format` | 13+，推荐 18+ | 格式化用户代码 |
 | OpenOCD | 当前发行版 | DAPLink 烧录和调试 |
 
-Linux 示例：
+Linux (Ubuntu/Debian) 示例：
 
 ```bash
 sudo apt install gcc-arm-none-eabi cmake ninja-build python3 clang-format openocd
 ```
+
+Linux (Arch Linux) 示例：
+
+```bash
+sudo pacman -S arm-none-eabi-gcc arm-none-eabi-newlib cmake ninja python clang openocd
+```
+
+Arch Linux 用户的详细配置说明见 [Arch Linux 环境配置指南](archlinux-setup.md)。
 
 macOS 示例：
 
@@ -51,14 +59,17 @@ cmake --build build/Debug --target clean
 
 ## 烧录与调试
 
-VS Code 中按 `F5` 启动调试，需要连接 DAPLink/CMSIS-DAP 探针。SWD 连接为 PA13/SWDIO、PA14/SWCLK、GND 和 3.3V。
+VS Code 中按 `F5` 启动调试，需要连接调试探针。SWD 连接为 PA13/SWDIO、PA14/SWCLK、GND 和 3.3V。
 
-命令行烧录：
+命令行烧录（WCH-Link 探针，需指定 VID/PID）：
 
 ```bash
 openocd -f interface/cmsis-dap.cfg -f target/stm32f1x.cfg \
+  -c "cmsis_dap_vid_pid 0x1a86 0x8012" \
   -c "program build/Debug/stm32f103c8t6_vscode_armgcc_daplink_threadX_env.elf verify reset exit"
 ```
+
+> 首次使用 WCH-Link 需要配置 udev 规则，详见 [Arch Linux 环境配置指南](archlinux-setup.md#udev-规则)。
 
 ## 代码格式化
 
